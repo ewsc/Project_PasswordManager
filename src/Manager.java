@@ -4,16 +4,23 @@ import java.util.Scanner;
 public class Manager {
 
     static final String keyword = "pswrd";
-    public static String getCommand() {
+    public static String getCommand(boolean isExiting) {
         String command;
         Scanner scan = new Scanner(System.in);
         command = scan.nextLine();
-        //scan.close();
+        if (isExiting) {
+            scan.close();
+        }
         return command;
     }
 
-    public static void wrongCommand(String command) {
-        System.err.println("Action [" + command + "] not found.");
+    public static void wrongCommand(String command, char type) {
+        switch (type) {
+            case 'a':
+                System.err.println("Action [" + command + "] not found.");
+            case 'c':
+                System.err.println("Command [" + command + "] not found.");
+        }
     }
 
 
@@ -34,16 +41,27 @@ public class Manager {
         return splitArr[1];
     }
 
+    public static void executeAction(String action) {
+        switch (action) {
+            case "add" -> System.out.println("adding");
+            case "del" -> System.out.println("deleting");
+            default -> wrongCommand(action, 'a');
+        }
+    }
+
     public static void getAction() {
         String command = null;
         while (!Objects.equals(command, "exit")) {
-            command = getCommand();
+            command = getCommand(false);
             if (checkParent(command)) {
                 String action = detectAction(command);
-                System.out.println(action);
+                executeAction(action);
             } else {
-                wrongCommand(command);
+                wrongCommand(command, 'c');
             }
+        }
+        if (Objects.equals(command, "exit")) {
+            getCommand(true);
         }
     }
     public static void main(String[] args) {
