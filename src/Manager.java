@@ -46,11 +46,13 @@ public class Manager {
     }
 
     public static String inputPassword(char type) {
+        boolean isCorrectPassword = true;
+        String resPass = "";
         if (type == 'k') {
-            System.out.print("Input new password keyword:");
+            System.out.print("Input new password keyword: ");
         }
         else if (type == 'p') {
-            System.out.print("Input new password:");
+            System.out.print("Input new password: ");
         }
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
@@ -76,20 +78,50 @@ public class Manager {
         return newPassword;
     }
 
+    public static String gSaveVal(String password, String encPassword) {
+        StringBuilder resultPass = new StringBuilder(password);
+        for (int i = 0; i < resultPass.length(); i++) {
+            int charA = encPassword.charAt(i);
+            int charB = resultPass.charAt(i);
+            resultPass.setCharAt(i, (char) (charA ^ charB));
+        }
+        return String.valueOf(resultPass);
+    }
+
     public static void addNewRecord() {
         PasswordRecord newALElem = new PasswordRecord();
         newALElem.keyword = inputPassword('k');
         String password = inputPassword('p');
-        System.out.println("Encoding...");
+        System.out.println("Encoding... Complete.");
         newALElem.encValue = encodePassword(password);
-        newALElem.defValue = password;
+        //newALElem.defValue = password;
+        newALElem.saveValue = gSaveVal(password, newALElem.encValue);
         passwordRecordAL.add(newALElem);
+    }
+
+    public static String getDef(String encVal, String svvVal) {
+        StringBuilder resVal = new StringBuilder();
+        resVal.setLength(encVal.length());
+        for (int i = 0; i < svvVal.length(); i++) {
+            int charA = encVal.charAt(i);
+            int charB = svvVal.charAt(i);
+            resVal.setCharAt(i, (char) (charA ^ charB));
+        }
+        return String.valueOf(resVal);
+    }
+
+    public static void showPass() {
+        for (PasswordRecord passwordRecord : passwordRecordAL) {
+            System.out.println(passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
+        }
+        System.out.println();
     }
 
     public static void executeAction(String action) {
         switch (action) {
             case "add" -> addNewRecord();
-            case "del" -> System.out.println("deleting");
+            case "del" -> System.out.println("nonexistent btw");
+            case "show" -> showPass();
             default -> wrongCommand(action, 'a');
         }
     }
