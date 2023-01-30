@@ -1,9 +1,12 @@
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
-import java.security.NoSuchAlgorithmException;
-import java.security.MessageDigest;
 
 public class Manager {
 
@@ -98,13 +101,28 @@ public class Manager {
         writer.close();
     }
 
+    public static boolean isGoodPassword(String password) {
+        if (password.length() < 8) {
+            System.out.println("Password must be at least 8 characters long!");
+            return false;
+        }
+        if (!password.matches("^[a-zA-Z0-9_]+")) {
+            System.out.println("Password could contain only English letters, digits and underscores '_'");
+            return false;
+        }
+        return true;
+    }
+
     public static void addNewRecord() throws IOException {
         PasswordRecord newALElem = new PasswordRecord();
         newALElem.keyword = inputPassword('k');
-        String password = inputPassword('p');
-        System.out.println("Encoding... Complete.");
+        String password;
+        do {
+            password = inputPassword('p');
+        } while (!isGoodPassword(password));
         newALElem.encValue = encodePassword(password);
         newALElem.saveValue = getSaveVal(password, newALElem.encValue);
+        System.out.print("Encoding... ");
         passwordRecordAL.add(newALElem);
         updateFile();
     }
