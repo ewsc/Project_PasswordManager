@@ -93,7 +93,7 @@ public class Manager {
         FileWriter writer = new FileWriter(mainFile);
         writer.write("pass=" + mainPassword + "\n");
         for (PasswordRecord passwordRecord : passwordRecordAL) {
-            writer.write(passwordRecord.keyword + "=" + passwordRecord.encValue + "=" + passwordRecord.saveValue + "\n");
+            writer.write("=KEY=" + passwordRecord.keyword + "=" + passwordRecord.encValue + "=" + passwordRecord.saveValue);
         }
         writer.close();
     }
@@ -227,11 +227,31 @@ public class Manager {
         return Objects.equals(filePassword, mainPassword);
     }
 
+    public static void loadFileData() throws IOException {
+        File dataFile = new File(mainFilePath);
+        Scanner scanner = new Scanner(dataFile);
+        String ignore = scanner.nextLine();
+        StringBuilder fileSData = new StringBuilder();
+        while (scanner.hasNextLine()) {
+            fileSData.append(scanner.nextLine());
+        }
+        String[] fileRecords = fileSData.toString().split("=KEY=");
+        for (String fileRecord : fileRecords) {
+            String[] fileRecString = fileRecord.split("=");
+            PasswordRecord fileRec = new PasswordRecord();
+            fileRec.keyword = fileRecString[0];
+            fileRec.encValue = fileRecString[1];
+            fileRec.saveValue = fileRecString[2];
+            passwordRecordAL.add(fileRec);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         do {
             checkPasswordFile();
             checkForPasswordLine();
         } while (!passwordsMatch());
+        loadFileData();
         System.out.println("Welcome back! Use [" + keyword + " help] to get info.");
         getAction();
     }
