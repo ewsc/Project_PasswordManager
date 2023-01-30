@@ -200,19 +200,19 @@ public class Manager {
     }
 
     public static void getAction() throws IOException {
-        String command = null;
-        while (!Objects.equals(command, "exit")) {
+        String command;
+        do {
             command = getCommand(false);
-            if (checkParent(command)) {
+            if (command.equals("exit")) {
+                break;
+            }
+            else if (checkParent(command)) {
                 String action = detectAction(command);
                 executeAction(action);
             } else {
                 wrongCommand(command, 'c');
             }
-        }
-        if (Objects.equals(command, "exit")) {
-            getCommand(true);
-        }
+        } while (true);
     }
 
     public static boolean passwordsMatch() {
@@ -236,13 +236,17 @@ public class Manager {
             fileSData.append(scanner.nextLine());
         }
         String[] fileRecords = fileSData.toString().split("=KEY=");
-        for (String fileRecord : fileRecords) {
-            String[] fileRecString = fileRecord.split("=");
-            PasswordRecord fileRec = new PasswordRecord();
-            fileRec.keyword = fileRecString[0];
-            fileRec.encValue = fileRecString[1];
-            fileRec.saveValue = fileRecString[2];
-            passwordRecordAL.add(fileRec);
+        if (fileRecords.length > 1) {
+            for (String fileRecord : fileRecords) {
+                if (fileRecord.length() > 1) {
+                    String[] fileRecString = fileRecord.split("=");
+                    PasswordRecord fileRec = new PasswordRecord();
+                    fileRec.keyword = fileRecString[0];
+                    fileRec.encValue = fileRecString[1];
+                    fileRec.saveValue = fileRecString[2];
+                    passwordRecordAL.add(fileRec);
+                }
+            }
         }
     }
 
