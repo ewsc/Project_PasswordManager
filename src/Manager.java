@@ -9,11 +9,12 @@ public class Manager {
 
     static final String keyword = "pswrd";
     static private final ArrayList <PasswordRecord> passwordRecordAL = new ArrayList<>();
-    static private final String passwordFilePath = "data.dat";
+    static private final String mainFilePath = "data.dat";
     static private String mainPassword;
 
     public static String getCommand(boolean isExiting) {
         String command;
+        System.out.print("> ");
         Scanner scan = new Scanner(System.in);
         command = scan.nextLine();
         if (isExiting) {
@@ -24,10 +25,8 @@ public class Manager {
 
     public static void wrongCommand(String command, char type) {
         switch (type) {
-            case 'a':
-                System.err.println("Action [" + command + "] not found.");
-            case 'c':
-                System.err.println("Command [" + command + "] not found.");
+            case 'a' -> System.err.println("Action [" + command + "] not found.");
+            case 'c' -> System.err.println("Command [" + command + "] not found.");
         }
     }
 
@@ -89,7 +88,17 @@ public class Manager {
         return String.valueOf(resultPass);
     }
 
-    public static void addNewRecord() {
+    public static void updateFile() throws IOException {
+        File mainFile = new File(mainFilePath);
+        FileWriter writer = new FileWriter(mainFile);
+        writer.write("pass=" + mainPassword + "\n");
+        for (PasswordRecord passwordRecord : passwordRecordAL) {
+            writer.write(passwordRecord.keyword + "=" + passwordRecord.encValue + "=" + passwordRecord.saveValue + "\n");
+        }
+        writer.close();
+    }
+
+    public static void addNewRecord() throws IOException {
         PasswordRecord newALElem = new PasswordRecord();
         newALElem.keyword = inputPassword('k');
         String password = inputPassword('p');
@@ -97,6 +106,7 @@ public class Manager {
         newALElem.encValue = encodePassword(password);
         newALElem.saveValue = getSaveVal(password, newALElem.encValue);
         passwordRecordAL.add(newALElem);
+        updateFile();
     }
 
     public static String getDef(String encVal, String svvVal) {
@@ -120,7 +130,7 @@ public class Manager {
 
     public static void checkPasswordFile() {
         try {
-            File mainPassFile = new File(passwordFilePath);
+            File mainPassFile = new File(mainFilePath);
             if (mainPassFile.createNewFile()) {
                 System.out.println("New data file created at " + mainPassFile.getAbsolutePath() + ";");
             }
@@ -137,7 +147,7 @@ public class Manager {
         System.out.println(keyword + " help -> show this menu.\n");
     }
 
-    public static void executeAction(String action) {
+    public static void executeAction(String action) throws IOException {
         switch (action) {
             case "add" -> addNewRecord();
             case "del" -> System.out.println("nonexistent btw");
@@ -150,7 +160,7 @@ public class Manager {
     public static void createNewPass() {
         String newPass;
         try {
-            File mainPassFile = new File(passwordFilePath);
+            File mainPassFile = new File(mainFilePath);
             FileWriter writer = new FileWriter(mainPassFile);
             newPass = inputPassword('n');
             String encNewPass = encodePassword(newPass);
@@ -171,7 +181,7 @@ public class Manager {
     public static void checkForPasswordLine() {
         String passwordLine = null;
         try {
-            File mainPassFile = new File(passwordFilePath);
+            File mainPassFile = new File(mainFilePath);
             Scanner fileScanner  = new Scanner(mainPassFile);
             if (fileScanner.hasNextLine()) {
                 passwordLine = fileScanner.nextLine();
@@ -189,7 +199,7 @@ public class Manager {
         }
     }
 
-    public static void getAction() {
+    public static void getAction() throws IOException {
         String command = null;
         while (!Objects.equals(command, "exit")) {
             command = getCommand(false);
@@ -208,7 +218,7 @@ public class Manager {
     public static boolean passwordsMatch() {
         String filePassword;
         try {
-            File passFile = new File(passwordFilePath);
+            File passFile = new File(mainFilePath);
             Scanner fileScanner = new Scanner(passFile);
             filePassword = returnFilePassword(fileScanner.nextLine());
         } catch (Exception e) {
@@ -217,12 +227,12 @@ public class Manager {
         return Objects.equals(filePassword, mainPassword);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         do {
             checkPasswordFile();
             checkForPasswordLine();
         } while (!passwordsMatch());
-        System.out.println("Welcome! You're in! Use [" + keyword + " help] to get info.");
+        System.out.println("Welcome back! Use [" + keyword + " help] to get info.");
         getAction();
     }
 }
