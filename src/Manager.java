@@ -1,15 +1,16 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
-import java.io.*;
 
 public class Manager {
 
     static final String keyword = "pswrd";
     static private final ArrayList <PasswordRecord> passwordRecordAL = new ArrayList<>();
-    static private final String passwordFilePath = System.getProperty("user.dir") + "\\file";
+    static private final String passwordFilePath = "data.dat";
+    static private String mainPassword;
 
     public static String getCommand(boolean isExiting) {
         String command;
@@ -29,7 +30,6 @@ public class Manager {
                 System.err.println("Command [" + command + "] not found.");
         }
     }
-
 
     public static boolean checkParent(String command) {
         int keyLength = keyword.length();
@@ -117,47 +117,24 @@ public class Manager {
         System.out.println();
     }
 
-    public static boolean getMainPassword(boolean passwordExists) throws IOException {
-        String mainPassword;
-        if (!passwordExists) {
-            mainPassword = inputPassword('n');
-        }
-        else {
-            mainPassword = inputPassword('m');
-        }
-        String encPassVal = encodePassword(mainPassword);
-        String svvPassVal = getSaveVal(mainPassword, encPassVal);
-        File mainPassFile = new File(passwordFilePath);
-        if (passwordExists) {
-            Scanner reader = new Scanner(mainPassFile);
-            String data = reader.nextLine();
-            reader.close();
-            return Objects.equals(svvPassVal, data);
-        }
-        else {
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(passwordFilePath));
-                writer.write(svvPassVal + "\n");
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        }
-    }
 
-    public static boolean createPasswordFile() {
-        boolean fileExists = true;
-        File mainPassFile = new File(passwordFilePath);
+    public static void checkPasswordFile() {
         try {
+            File mainPassFile = new File(passwordFilePath);
             if (mainPassFile.createNewFile()) {
-                fileExists = false;
+                System.out.println("New data file created at " + mainPassFile.getAbsolutePath() + ";");
             }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
-        return fileExists;
+    }
+
+    public static void pleaseSomebodyHelp() {
+        System.out.println("\nHere are some useful commands: ");
+        System.out.println(keyword + " add -> add new password record.");
+        System.out.println(keyword + " show -> show list of passwords.");
+        System.out.println(keyword + " help -> show this menu.\n");
     }
 
     public static void executeAction(String action) {
@@ -165,7 +142,50 @@ public class Manager {
             case "add" -> addNewRecord();
             case "del" -> System.out.println("nonexistent btw");
             case "show" -> showPass();
+            case "help" -> pleaseSomebodyHelp();
             default -> wrongCommand(action, 'a');
+        }
+    }
+
+    public static void createNewPass() {
+        String newPass;
+        try {
+            File mainPassFile = new File(passwordFilePath);
+            FileWriter writer = new FileWriter(mainPassFile);
+            newPass = inputPassword('n');
+            String encNewPass = encodePassword(newPass);
+            newPass = getSaveVal(newPass, encNewPass);
+            writer.write("pass=" + newPass);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        mainPassword = newPass;
+    }
+
+    public static String returnFilePassword(String passwordLine) {
+        String[] passLine = passwordLine.split("=");
+        return passLine[1];
+    }
+
+    public static void checkForPasswordLine() {
+        String passwordLine = null;
+        try {
+            File mainPassFile = new File(passwordFilePath);
+            Scanner fileScanner  = new Scanner(mainPassFile);
+            if (fileScanner.hasNextLine()) {
+                passwordLine = fileScanner.nextLine();
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        if (passwordLine != null) {
+            String tempPass = inputPassword('m');
+            String envPass = encodePassword(tempPass);
+            mainPassword = getSaveVal(tempPass, envPass);
+        }
+        else {
+            createNewPass();
         }
     }
 
@@ -185,10 +205,24 @@ public class Manager {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        boolean fileExists = createPasswordFile();
-        if (getMainPassword(fileExists)) {
-            getAction();
+    public static boolean passwordsMatch() {
+        String filePassword;
+        try {
+            File passFile = new File(passwordFilePath);
+            Scanner fileScanner = new Scanner(passFile);
+            filePassword = returnFilePassword(fileScanner.nextLine());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        return Objects.equals(filePassword, mainPassword);
+    }
+
+    public static void main(String[] args) {
+        do {
+            checkPasswordFile();
+            checkForPasswordLine();
+        } while (!passwordsMatch());
+        System.out.println("Welcome! You're in! Use [" + keyword + " help] to get info.");
+        getAction();
     }
 }
