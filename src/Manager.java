@@ -56,6 +56,7 @@ public class Manager {
             case 'p' -> System.out.print("Input new password: ");
             case 'm' -> System.out.print("Input main password: ");
             case 'n' -> System.out.print("Input new main password: ");
+            case 'd' -> System.out.print("Input index of record you want to delete: ");
         }
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
@@ -139,8 +140,9 @@ public class Manager {
     }
 
     public static void showPass() {
-        for (PasswordRecord passwordRecord : passwordRecordAL) {
-            System.out.println(passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
+        for (int i = 0; i < passwordRecordAL.size(); i++) {
+            PasswordRecord passwordRecord = passwordRecordAL.get(i);
+            System.out.println("[" + i + "] " + passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
         }
         System.out.println();
     }
@@ -162,13 +164,36 @@ public class Manager {
         System.out.println("\nHere are some useful commands: ");
         System.out.println(keyword + " add -> add new password record.");
         System.out.println(keyword + " show -> show list of passwords.");
+        System.out.println(keyword + " delete -> delete password record.");
         System.out.println(keyword + " help -> show this menu.\n");
+    }
+
+    public static void deleteRecord() throws IOException {
+        int deleting;
+        boolean isInt;
+        try {
+            deleting = Integer.parseInt(inputPassword('d'));
+            isInt = true;
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
+        if (deleting >= passwordRecordAL.size()) {
+            isInt = false;
+        }
+        if (isInt) {
+            passwordRecordAL.remove(deleting);
+            System.out.println("Deleted successfully.");
+            updateFile();
+        }
+        else {
+            System.out.println("Error at finding index [" + deleting + "].");
+        }
     }
 
     public static void executeAction(String action) throws IOException {
         switch (action) {
             case "add" -> addNewRecord();
-            case "del" -> System.out.println("nonexistent btw");
+            case "del" -> deleteRecord();
             case "show" -> showPass();
             case "help" -> pleaseSomebodyHelp();
             default -> wrongCommand(action, 'a');
