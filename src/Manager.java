@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Manager {
 
-    static final String keyword = "pswrd";
+    static final String mngrKeyword = "pswrd";
     static private final ArrayList <PasswordRecord> passwordRecordAL = new ArrayList<>();
     static private final String mainFilePath = "data.dat";
     static private String mainPassword;
@@ -34,10 +34,10 @@ public class Manager {
     }
 
     public static boolean checkParent(String command) {
-        int keyLength = keyword.length();
+        int keyLength = mngrKeyword.length();
         if (command.length() > keyLength) {
             String parentComm = command.substring(0, keyLength);
-            return parentComm.equals(keyword);
+            return parentComm.equals(mngrKeyword);
         }
         else {
             System.err.println("Command is too short!");
@@ -114,16 +114,30 @@ public class Manager {
         return true;
     }
 
+    public static boolean isUniqueKeyword(String keyword) {
+        for (PasswordRecord passwordRecord : passwordRecordAL) {
+            if (Objects.equals(keyword, passwordRecord.keyword)) {
+                System.err.println("This keyword already exists!");
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void addNewRecord() throws IOException {
         PasswordRecord newALElem = new PasswordRecord();
-        newALElem.keyword = inputPassword('k');
+        String keyword;
+        do {
+            keyword = inputPassword('k');
+        } while (!isUniqueKeyword(keyword));
         String password;
         do {
             password = inputPassword('p');
         } while (!isGoodPassword(password));
+        newALElem.keyword = keyword;
         newALElem.encValue = encodePassword(password);
         newALElem.saveValue = getSaveVal(password, newALElem.encValue);
-        System.out.print("Encoding... ");
+        System.out.println("Password added!");
         passwordRecordAL.add(newALElem);
         updateFile();
     }
@@ -162,10 +176,10 @@ public class Manager {
 
     public static void pleaseSomebodyHelp() {
         System.out.println("\nHere are some useful commands: ");
-        System.out.println(keyword + " add -> add new password record.");
-        System.out.println(keyword + " show -> show list of passwords.");
-        System.out.println(keyword + " delete -> delete password record.");
-        System.out.println(keyword + " help -> show this menu.\n");
+        System.out.println(mngrKeyword + " add -> add new password record.");
+        System.out.println(mngrKeyword + " show -> show list of passwords.");
+        System.out.println(mngrKeyword + " delete -> delete password record.");
+        System.out.println(mngrKeyword + " help -> show this menu.\n");
     }
 
     public static void deleteRecord() throws IOException {
@@ -186,7 +200,7 @@ public class Manager {
             updateFile();
         }
         else {
-            System.out.println("Error at finding index [" + deleting + "].");
+            System.err.println("Error at finding index [" + deleting + "].");
         }
     }
 
@@ -299,7 +313,7 @@ public class Manager {
             checkForPasswordLine();
         } while (!passwordsMatch());
         loadFileData();
-        System.out.println("Welcome back! Use [" + keyword + " help] to get info.");
+        System.out.println("Welcome back! Use [" + mngrKeyword + " help] to get info.");
         getAction();
     }
 }
