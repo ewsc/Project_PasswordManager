@@ -155,9 +155,14 @@ public class Manager {
     }
 
     public static void showPass() {
-        for (int i = 0; i < passwordRecords.size(); i++) {
-            PasswordRecord passwordRecord = passwordRecords.get(i);
-            System.out.println("[" + i + "] " + passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
+        if (passwordRecords.size() > 0) {
+            for (int i = 0; i < passwordRecords.size(); i++) {
+                PasswordRecord passwordRecord = passwordRecords.get(i);
+                System.out.println("[" + (i + 1) + "] " + passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
+            }
+        }
+        else {
+            System.out.println("nothing to see here.");
         }
     }
 
@@ -199,7 +204,7 @@ public class Manager {
             case "add" -> addNewRecord(currentQuery.paramUno, currentQuery.paramDos);
             case "del" -> {
                 try {
-                    deleteRecord(Integer.parseInt(currentQuery.paramUno));
+                    deleteRecord(Integer.parseInt(currentQuery.paramUno) - 1);
                 }
                 catch (Exception e) {
                     System.err.println("error at checking index [" + currentQuery.paramUno + "]");
@@ -258,6 +263,7 @@ public class Manager {
             Query currentQuery = getCommand(false);
             String command = currentQuery.command;
             if (command.equals("exit")) {
+                System.err.println("cya.");
                 break;
             }
             else if (checkParent(command)) {
