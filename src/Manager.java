@@ -51,7 +51,6 @@ public class Manager {
             return parentComm.equals(mngrKeyword);
         }
         else {
-            System.err.println("Command is too short!");
             return false;
         }
     }
@@ -60,7 +59,6 @@ public class Manager {
         switch (type) {
             case 'm' -> System.out.print("Input main password: ");
             case 'n' -> System.out.print("Input new main password: ");
-            case 'd' -> System.out.print("Input index of record you want to delete: ");
         }
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
@@ -177,7 +175,7 @@ public class Manager {
     }
 
     public static void pleaseSomebodyHelp() {
-        System.out.println("\nHere are some useful commands: ");
+        System.out.println("Here are some useful commands: ");
         System.out.println(mngrKeyword + " add -> add new password record.");
         System.out.println(mngrKeyword + " show -> show list of passwords.");
         System.out.println(mngrKeyword + " delete -> delete password record.");
@@ -198,7 +196,14 @@ public class Manager {
     public static void executeAction(Query currentQuery) throws IOException {
         switch (currentQuery.action) {
             case "add" -> addNewRecord(currentQuery.paramUno, currentQuery.paramDos);
-            case "del" -> deleteRecord(Integer.parseInt(currentQuery.paramUno));
+            case "del" -> {
+                try {
+                    deleteRecord(Integer.parseInt(currentQuery.paramUno));
+                }
+                catch (Exception e) {
+                    System.err.println("Error at checking index [" + currentQuery.paramUno + "]");
+                }
+            }
             case "show" -> showPass();
             case "help" -> pleaseSomebodyHelp();
             default -> wrongCommand(currentQuery.action, 'a');
