@@ -15,15 +15,26 @@ public class Manager {
     static private final String mainFilePath = "data.dat";
     static private String mainPassword;
 
-    public static String getCommand(boolean isExiting) {
-        String command;
-        System.out.print("> ");
+    public static Query getCommand(boolean isExiting) {
+        String line;
         Scanner scan = new Scanner(System.in);
-        command = scan.nextLine();
+        line = scan.nextLine();
         if (isExiting) {
             scan.close();
         }
-        return command;
+        Query resQuery = new Query();
+        String[] resQuerySplit = line.split(" ");
+        resQuery.command = resQuerySplit[0];
+        if (resQuerySplit.length > 1) {
+            resQuery.action = resQuerySplit[1];
+        }
+        if (resQuerySplit.length > 2) {
+            resQuery.paramUno = resQuerySplit[2];
+        }
+        if (resQuerySplit.length > 3) {
+            resQuery.paramDos = resQuerySplit[3];
+        }
+        return resQuery;
     }
 
     public static void wrongCommand(String command, char type) {
@@ -35,7 +46,7 @@ public class Manager {
 
     public static boolean checkParent(String command) {
         int keyLength = mngrKeyword.length();
-        if (command.length() > keyLength) {
+        if (command.length() >= keyLength) {
             String parentComm = command.substring(0, keyLength);
             return parentComm.equals(mngrKeyword);
         }
@@ -43,11 +54,6 @@ public class Manager {
             System.err.println("Command is too short!");
             return false;
         }
-    }
-
-    public static String detectAction(String command) {
-        String[] splitArr = command.split(" ");
-        return splitArr[1];
     }
 
     public static String inputPassword(char type) {
@@ -124,16 +130,8 @@ public class Manager {
         return true;
     }
 
-    public static void addNewRecord() throws IOException {
+    public static void addNewRecord(String keyword, String password) throws IOException {
         PasswordRecord newALElem = new PasswordRecord();
-        String keyword;
-        do {
-            keyword = inputPassword('k');
-        } while (!isUniqueKeyword(keyword));
-        String password;
-        do {
-            password = inputPassword('p');
-        } while (!isGoodPassword(password));
         newALElem.keyword = keyword;
         newALElem.encValue = encodePassword(password);
         newALElem.saveValue = getSaveVal(password, newALElem.encValue);
@@ -204,13 +202,13 @@ public class Manager {
         }
     }
 
-    public static void executeAction(String action) throws IOException {
-        switch (action) {
-            case "add" -> addNewRecord();
+    public static void executeAction(Query currentQuery) throws IOException {
+        switch (currentQuery.action) {
+            case "add" -> addNewRecord(currentQuery.paramUno, currentQuery.paramUno);
             case "del" -> deleteRecord();
             case "show" -> showPass();
             case "help" -> pleaseSomebodyHelp();
-            default -> wrongCommand(action, 'a');
+            default -> wrongCommand(currentQuery.action, 'a');
         }
     }
 
@@ -257,15 +255,14 @@ public class Manager {
     }
 
     public static void getAction() throws IOException {
-        String command;
         do {
-            command = getCommand(false);
+            Query currentQuery = getCommand(false);
+            String command = currentQuery.command;
             if (command.equals("exit")) {
                 break;
             }
             else if (checkParent(command)) {
-                String action = detectAction(command);
-                executeAction(action);
+                executeAction(currentQuery);
             } else {
                 wrongCommand(command, 'c');
             }
