@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Manager {
 
     static final String mngrKeyword = "pswrd";
-    static private final ArrayList <PasswordRecord> passwordRecordAL = new ArrayList<>();
+    static private final ArrayList <PasswordRecord> passwordRecords = new ArrayList<>();
     static private final String mainFilePath = "data.dat";
     static private String mainPassword;
 
@@ -39,8 +39,8 @@ public class Manager {
 
     public static void wrongCommand(String command, char type) {
         switch (type) {
-            case 'a' -> System.err.println("Action [" + command + "] not found.");
-            case 'c' -> System.err.println("Command [" + command + "] not found.");
+            case 'a' -> System.err.println("action [" + command + "] not found.");
+            case 'c' -> System.err.println("command [" + command + "] not found.");
         }
     }
 
@@ -57,8 +57,8 @@ public class Manager {
 
     public static String inputPassword(char type) {
         switch (type) {
-            case 'm' -> System.out.print("Input main password: ");
-            case 'n' -> System.out.print("Input new main password: ");
+            case 'm' -> System.out.print("input main password: ");
+            case 'n' -> System.out.print("input new main password: ");
         }
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
@@ -98,7 +98,7 @@ public class Manager {
         File mainFile = new File(mainFilePath);
         FileWriter writer = new FileWriter(mainFile);
         writer.write("pass=" + mainPassword + "\n");
-        for (PasswordRecord passwordRecord : passwordRecordAL) {
+        for (PasswordRecord passwordRecord : passwordRecords) {
             writer.write("=KEY=" + passwordRecord.keyword + "=" + passwordRecord.encValue + "=" + passwordRecord.saveValue);
         }
         writer.close();
@@ -106,20 +106,20 @@ public class Manager {
 
     public static boolean isGoodPassword(String password) {
         if (password.length() < 8) {
-            System.out.println("Password must be at least 8 characters long!");
+            System.out.println("password must be at least 8 characters long.");
             return false;
         }
         if (!password.matches("^[a-zA-Z0-9_]+")) {
-            System.out.println("Password could contain only English letters, digits and underscores '_'");
+            System.out.println("password could contain only English letters, digits and underscores '_'");
             return false;
         }
         return true;
     }
 
     public static boolean isUniqueKeyword(String keyword) {
-        for (PasswordRecord passwordRecord : passwordRecordAL) {
+        for (PasswordRecord passwordRecord : passwordRecords) {
             if (Objects.equals(keyword, passwordRecord.keyword)) {
-                System.err.println("This keyword already exists!");
+                System.err.println("this keyword already exists.");
                 return false;
             }
         }
@@ -133,13 +133,13 @@ public class Manager {
                 newALElem.keyword = keyword;
                 newALElem.encValue = encodePassword(password);
                 newALElem.saveValue = getSaveVal(password, newALElem.encValue);
-                System.out.println("Password added!");
-                passwordRecordAL.add(newALElem);
+                System.out.println("password added.");
+                passwordRecords.add(newALElem);
                 updateFile();
             }
         }
         else {
-            System.err.println("Input keyword and password!");
+            System.err.println("input keyword and password.");
         }
     }
 
@@ -155,8 +155,8 @@ public class Manager {
     }
 
     public static void showPass() {
-        for (int i = 0; i < passwordRecordAL.size(); i++) {
-            PasswordRecord passwordRecord = passwordRecordAL.get(i);
+        for (int i = 0; i < passwordRecords.size(); i++) {
+            PasswordRecord passwordRecord = passwordRecords.get(i);
             System.out.println("[" + i + "] " + passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
         }
     }
@@ -166,7 +166,7 @@ public class Manager {
         try {
             File mainPassFile = new File(mainFilePath);
             if (mainPassFile.createNewFile()) {
-                System.out.println("New data file created at " + mainPassFile.getAbsolutePath() + ";");
+                System.out.println("new data file created at " + mainPassFile.getAbsolutePath() + ".");
             }
         }
         catch (IOException e) {
@@ -175,21 +175,22 @@ public class Manager {
     }
 
     public static void pleaseSomebodyHelp() {
-        System.out.println("Here are some useful commands: ");
-        System.out.println(mngrKeyword + " add -> add new password record.");
-        System.out.println(mngrKeyword + " show -> show list of passwords.");
-        System.out.println(mngrKeyword + " delete -> delete password record.");
-        System.out.println(mngrKeyword + " help -> show this menu.\n");
+        String version = "1.0";
+        System.out.println("password manager by gthanksg v." + version + ".");
+        System.out.println(mngrKeyword + " add [unique keyword] [password] - adds password. password should be at least 8 chars long.");
+        System.out.println(mngrKeyword + " show - shows list of all passwords.");
+        System.out.println(mngrKeyword + " delete [password record id] - deletes password from passwords list. check password list at /list.");
+        System.out.println(mngrKeyword + " help - show this menu (wow).\n");
     }
 
     public static void deleteRecord(int deleting) throws IOException {
-        if (deleting < passwordRecordAL.size()) {
-            passwordRecordAL.remove(deleting);
-            System.out.println("Deleted successfully.");
+        if (deleting < passwordRecords.size()) {
+            passwordRecords.remove(deleting);
+            System.out.println("deleted successfully.");
             updateFile();
         }
         else {
-            System.err.println("Error at finding index [" + deleting + "].");
+            System.err.println("error at finding index [" + deleting + "].");
         }
     }
 
@@ -201,7 +202,7 @@ public class Manager {
                     deleteRecord(Integer.parseInt(currentQuery.paramUno));
                 }
                 catch (Exception e) {
-                    System.err.println("Error at checking index [" + currentQuery.paramUno + "]");
+                    System.err.println("error at checking index [" + currentQuery.paramUno + "]");
                 }
             }
             case "show" -> showPass();
@@ -296,7 +297,7 @@ public class Manager {
                     fileRec.keyword = fileRecString[0];
                     fileRec.encValue = fileRecString[1];
                     fileRec.saveValue = fileRecString[2];
-                    passwordRecordAL.add(fileRec);
+                    passwordRecords.add(fileRec);
                 }
             }
         }
@@ -308,7 +309,8 @@ public class Manager {
             checkForPasswordLine();
         } while (!passwordsMatch());
         loadFileData();
-        System.out.println("Welcome back! Use [" + mngrKeyword + " help] to get info.");
+        System.out.println("login successful.");
+        System.out.println("use [" + mngrKeyword + " help] to get info.");
         getAction();
     }
 }
