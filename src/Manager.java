@@ -179,8 +179,8 @@ public class Manager {
         System.out.println("password manager by gthanksg v." + version + ".");
         System.out.println(mngrKeyword + " add [unique keyword] [password] - adds password. password should be at least 8 chars long.");
         System.out.println(mngrKeyword + " show - shows list of all passwords.");
-        System.out.println(mngrKeyword + " delete [password record id] - deletes password from passwords list. check password list at /list.");
-        System.out.println(mngrKeyword + " help - show this menu (wow).\n");
+        System.out.println(mngrKeyword + " delete [password record id] - deletes password from passwords list. check password list at [" + mngrKeyword + " show].");
+        System.out.println(mngrKeyword + " help - show this menu (wow).");
     }
 
     public static void deleteRecord(int deleting) throws IOException {
