@@ -161,7 +161,6 @@ public class Manager {
             PasswordRecord passwordRecord = passwordRecordAL.get(i);
             System.out.println("[" + i + "] " + passwordRecord.keyword + " -> " + getDef(passwordRecord.encValue, passwordRecord.saveValue) + " (enc: " + passwordRecord.encValue + "), (svv: " + passwordRecord.saveValue + ");");
         }
-        System.out.println();
     }
 
 
@@ -185,19 +184,8 @@ public class Manager {
         System.out.println(mngrKeyword + " help -> show this menu.\n");
     }
 
-    public static void deleteRecord() throws IOException {
-        int deleting;
-        boolean isInt;
-        try {
-            deleting = Integer.parseInt(inputPassword('d'));
-            isInt = true;
-        } catch (NumberFormatException e) {
-            throw new RuntimeException(e);
-        }
-        if (deleting >= passwordRecordAL.size()) {
-            isInt = false;
-        }
-        if (isInt) {
+    public static void deleteRecord(int deleting) throws IOException {
+        if (deleting < passwordRecordAL.size()) {
             passwordRecordAL.remove(deleting);
             System.out.println("Deleted successfully.");
             updateFile();
@@ -209,8 +197,8 @@ public class Manager {
 
     public static void executeAction(Query currentQuery) throws IOException {
         switch (currentQuery.action) {
-            case "add" -> addNewRecord(currentQuery.paramUno, currentQuery.paramUno);
-            case "del" -> deleteRecord();
+            case "add" -> addNewRecord(currentQuery.paramUno, currentQuery.paramDos);
+            case "del" -> deleteRecord(Integer.parseInt(currentQuery.paramUno));
             case "show" -> showPass();
             case "help" -> pleaseSomebodyHelp();
             default -> wrongCommand(currentQuery.action, 'a');
