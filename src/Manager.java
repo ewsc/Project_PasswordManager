@@ -58,8 +58,6 @@ public class Manager {
 
     public static String inputPassword(char type) {
         switch (type) {
-            case 'k' -> System.out.print("Input new password keyword: ");
-            case 'p' -> System.out.print("Input new password: ");
             case 'm' -> System.out.print("Input main password: ");
             case 'n' -> System.out.print("Input new main password: ");
             case 'd' -> System.out.print("Input index of record you want to delete: ");
@@ -131,13 +129,20 @@ public class Manager {
     }
 
     public static void addNewRecord(String keyword, String password) throws IOException {
-        PasswordRecord newALElem = new PasswordRecord();
-        newALElem.keyword = keyword;
-        newALElem.encValue = encodePassword(password);
-        newALElem.saveValue = getSaveVal(password, newALElem.encValue);
-        System.out.println("Password added!");
-        passwordRecordAL.add(newALElem);
-        updateFile();
+        if (password != null && keyword != null) {
+            if (isUniqueKeyword(keyword) && isGoodPassword(password)) {
+                PasswordRecord newALElem = new PasswordRecord();
+                newALElem.keyword = keyword;
+                newALElem.encValue = encodePassword(password);
+                newALElem.saveValue = getSaveVal(password, newALElem.encValue);
+                System.out.println("Password added!");
+                passwordRecordAL.add(newALElem);
+                updateFile();
+            }
+        }
+        else {
+            System.err.println("Input keyword and password!");
+        }
     }
 
     public static String getDef(String encVal, String svvVal) {
