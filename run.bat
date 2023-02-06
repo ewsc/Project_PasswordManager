@@ -1,0 +1,1 @@
+START /MAX java -jar out\artifacts\fldr_jar\fldr.jar
